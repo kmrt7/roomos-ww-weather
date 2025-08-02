@@ -6,44 +6,104 @@
   <style>
     body {
       font-family: sans-serif;
-      text-align: center;
       margin: 0;
-      padding: 40px;
-      background: #f0f8ff;
-      height: 100%;
+      padding: 20px;
+      background: #f5faff;
+      color: #333;
     }
+
     h2 {
-      font-size: 1.5em;
+      font-size: 1.4em;
+      margin-bottom: 10px;
     }
-    #weather {
-      font-size: 1.2em;
+
+    .today {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #e0f7ff;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .today img {
+      width: 60px;
+      height: 60px;
+    }
+
+    .forecast {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
       margin-top: 20px;
+    }
+
+    .day {
+      background: #ffffff;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 0.9em;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .day img {
+      width: 40px;
+      height: 40px;
     }
   </style>
 </head>
 <body>
   <h2>江東区の現在の天気</h2>
-  <div id="weather">読み込み中...</div>
+  <div class="today" id="today">読み込み中...</div>
+  <h2 style="margin-top: 20px;">週間天気予報</h2>
+  <div class="forecast" id="forecast"></div>
 
   <script>
-    const apiKey = 'ea07e3eb26d73ffdba26e2b0161cc751'; // ← OpenWeatherMapのAPIキー
-    const cityId = '1850144'; // 東京都江東区（Tokyo）
+    const apiKey = 'YOUR_API_KEY'; // ← 自分のAPIキーに差し替えてください
+    const lat = 35.6702;
+    const lon = 139.8174;
 
-    fetch(`https://api.openweathermap.org/data/2.5/weather?id=${cityId}&appid=${apiKey}&lang=ja&units=metric`)
-      .then(response => response.json())
+    fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&units=metric&lang=ja&appid=${apiKey}`)
+      .then(res => res.json())
       .then(data => {
-        const weather = data.weather[0].description;
-        const temp = data.main.temp;
-        const rain = data.rain ? (data.rain["1h"] || 0) : 0;
-        document.getElementById('weather').innerHTML = `
-          天気：${weather}<br>
-          気温：${temp}℃<br>
-          降水量（1時間）：${rain} mm
+        const today = data.current;
+        const daily = data.daily;
+
+        // 今日の天気
+        const todayHtml = `
+          <img src="https://openweathermap.org/img/wn/${today.weather[0].icon}@2x.png" alt="天気">
+          <div>
+            <strong>${today.weather[0].description}</strong><br>
+            気温：${today.temp.toFixed(1)}℃<br>
+            湿度：${today.humidity}%<br>
+          </div>
         `;
+        document.getElementById('today').innerHTML = todayHtml;
+
+        // 週間天気
+        const days = ['日','月','火','水','木','金','土'];
+        let forecastHtml = '';
+        for (let i = 1; i <= 6; i++) {
+          const d = daily[i];
+          const date = new Date(d.dt * 1000);
+          const label = `${days[date.getDay()]}曜`;
+
+          forecastHtml += `
+            <div class="day">
+              <div><strong>${label}</strong></div>
+              <img src="https://openweathermap.org/img/wn/${d.weather[0].icon}@2x.png" alt="天気">
+              <div>${d.weather[0].description}</div>
+              <div>${d.temp.min.toFixed(0)}℃ / ${d.temp.max.toFixed(0)}℃</div>
+            </div>
+          `;
+        }
+
+        document.getElementById('forecast').innerHTML = forecastHtml;
       })
       .catch(err => {
         console.error(err);
-        document.getElementById('weather').innerText = "天気情報の取得に失敗しました。";
+        document.getElementById('today').innerText = "天気情報の取得に失敗しました。";
       });
   </script>
 </body>
