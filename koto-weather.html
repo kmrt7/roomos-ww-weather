@@ -51,6 +51,11 @@
       width: 40px;
       height: 40px;
     }
+
+    .high-pop {
+      color: #007BFF; /* 濃い青（Bootstrapのprimary色） */
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -60,51 +65,11 @@
   <div class="forecast" id="forecast"></div>
 
   <script>
-    const apiKey = 'YOUR_API_KEY'; // ← 自分のAPIキーに差し替えてください
+    const apiKey = 'YOUR_API_KEY'; // ← ご自身のAPIキーに差し替えてください
     const lat = 35.6702;
     const lon = 139.8174;
 
     fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&units=metric&lang=ja&appid=${apiKey}`)
       .then(res => res.json())
       .then(data => {
-        const today = data.current;
-        const daily = data.daily;
-
-        // 今日の天気
-        const todayHtml = `
-          <img src="https://openweathermap.org/img/wn/${today.weather[0].icon}@2x.png" alt="天気">
-          <div>
-            <strong>${today.weather[0].description}</strong><br>
-            気温：${today.temp.toFixed(1)}℃<br>
-            湿度：${today.humidity}%<br>
-          </div>
-        `;
-        document.getElementById('today').innerHTML = todayHtml;
-
-        // 週間天気
-        const days = ['日','月','火','水','木','金','土'];
-        let forecastHtml = '';
-        for (let i = 1; i <= 6; i++) {
-          const d = daily[i];
-          const date = new Date(d.dt * 1000);
-          const label = `${days[date.getDay()]}曜`;
-
-          forecastHtml += `
-            <div class="day">
-              <div><strong>${label}</strong></div>
-              <img src="https://openweathermap.org/img/wn/${d.weather[0].icon}@2x.png" alt="天気">
-              <div>${d.weather[0].description}</div>
-              <div>${d.temp.min.toFixed(0)}℃ / ${d.temp.max.toFixed(0)}℃</div>
-            </div>
-          `;
-        }
-
-        document.getElementById('forecast').innerHTML = forecastHtml;
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById('today').innerText = "天気情報の取得に失敗しました。";
-      });
-  </script>
-</body>
-</html>
+        const t
